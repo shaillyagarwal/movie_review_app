@@ -15,75 +15,106 @@ class MoviesPageState extends State<MoviesPage> {
 
   @override
   void initState() {
-    getData();
     super.initState();
+    getData();
   }
 
   getData() async {
     MovieService movieService = MovieService();
     upcomingMovies = await movieService.upcomingMovies();
-    setState(() {
-      _isLoading = false;
-    });
+    setState(() => _isLoading = false);
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Decide column count based on screen width
+    int crossAxisCount = screenWidth > 1200
+        ? 5
+        : screenWidth > 900
+        ? 4
+        : screenWidth > 600
+        ? 3
+        : 2;
+
     return Scaffold(
-      appBar: AppBar(title: Text('Upcoming Movies')),
+      appBar: AppBar(title: const Text('Upcoming Movies')),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : GridView.count(
-              crossAxisCount: 2,
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
-              children: List.generate(upcomingMovies.length, (index) {
-                final movie = upcomingMovies[index];
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MovieDetails(movie: movie),
-                      ),
-                    );
-                  },
-                  child: Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    elevation: 5,
-                    child: Column(
-                      children: [
-                        ClipRRect(
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            topRight: Radius.circular(10),
-                          ),
-                          child: Image.network(
-                            'https://image.tmdb.org/t/p/w200${movie['backdrop_path']}',
-                            width: double.infinity,
-                            height: 130,
-                            fit: BoxFit.cover,
-                          ),
+          : Padding(
+              padding: const EdgeInsets.all(10),
+              child: GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+
+                  // **Perfect movie poster ratio (vertical 2:3)**
+                  childAspectRatio: 0.62,
+                ),
+                itemCount: upcomingMovies.length,
+                itemBuilder: (context, index) {
+                  final movie = upcomingMovies[index];
+
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => MovieDetails(movie: movie),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Text(
-                            movie['title'],
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                      );
+                    },
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 4,
+                      child: Column(
+                        children: [
+                          // Image auto-resizes properly
+                          Expanded(
+                            flex: 7,
+                            child: ClipRRect(
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(12),
+                              ),
+                              child: Image.network(
+                                'https://image.tmdb.org/t/p/w500${movie['poster_path'] ?? movie['backdrop_path']}',
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+
+                          // Movie Title
+                          Expanded(
+                            flex: 2,
+                            child: Padding(
+                              padding: const EdgeInsets.all(6),
+                              child: Text(
+                                movie['title'],
+                                maxLines: 2,
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: screenWidth < 450
+                                      ? 12
+                                      : screenWidth < 900
+                                      ? 14
+                                      : 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              }),
+                  );
+                },
+              ),
             ),
     );
   }

@@ -12,6 +12,7 @@ class MovieDetails extends StatefulWidget {
 
 class MovieDetailsState extends State<MovieDetails> {
   List<dynamic> movies = [];
+
   @override
   void initState() {
     getData();
@@ -35,48 +36,59 @@ class MovieDetailsState extends State<MovieDetails> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.network(
-              'https://image.tmdb.org/t/p/w500${widget.movie['backdrop_path']}',
-              width: double.infinity,
-              height: 200,
-              fit: BoxFit.cover,
+            /// ✅ FIXED — Image no longer stretched
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Image.network(
+                'https://image.tmdb.org/t/p/w500${widget.movie['backdrop_path']}',
+                fit: BoxFit.cover,
+              ),
             ),
+
             const SizedBox(height: 20),
+
             Text(
               'Title: ${widget.movie['title']}',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
+
             Text(
               'Overview: ${widget.movie['overview']}',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 10),
+
             Text(
               'Release : ${widget.movie['release_date']}',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 10),
+
             Text(
               'Rating : ${widget.movie['vote_average']}',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 10),
+
             Text(
               'Vote Count : ${widget.movie['vote_count']}',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 10),
+
             Text(
               'Popularity : ${widget.movie['popularity']}',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 20),
+
             Text(
               'Similar Movies',
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 15),
+
             HorizontalView(movies: movies),
           ],
         ),
